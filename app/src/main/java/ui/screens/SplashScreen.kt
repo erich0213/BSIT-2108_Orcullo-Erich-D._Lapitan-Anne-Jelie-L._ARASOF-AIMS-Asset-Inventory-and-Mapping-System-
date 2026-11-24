@@ -1,7 +1,9 @@
 package ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,6 +21,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -28,45 +32,60 @@ import kotlinx.coroutines.delay
 fun SplashScreen(
     onFinished: () -> Unit
 ) {
-    val maroonColor = Color(0xFF7A0019)
-
     LaunchedEffect(Unit) {
-        delay(1800L)
+        delay(3000L)
         onFinished()
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(maroonColor)
-            .padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    Box(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Icon(
-            imageVector = Icons.Rounded.Inventory2,
-            contentDescription = "ARASOF-AIMS Logo",
-            tint = Color.White,
-            modifier = Modifier.size(72.dp)
+        Image(
+            painter = painterResource(id = com.arasof.aims.R.drawable.splash_bg),
+            contentDescription = "ARASOF-AIMS Background",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
         )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "ARASOF-AIMS",
-            style = MaterialTheme.typography.headlineMedium,
-            fontWeight = FontWeight.Bold,
-            color = Color.White
+
+        // Subtle dark maroon/black overlay para hindi matabunan ang puting text
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.35f))
         )
-        Spacer(modifier = Modifier.height(6.dp))
-        Text(
-            text = "Batangas State University - ARASOF Nasugbu\nAsset Inventory and Mapping System",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Color.White.copy(alpha = 0.9f),
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(28.dp))
-        CircularProgressIndicator(
-            color = Color.White,
-            strokeWidth = 3.dp
-        )
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Inventory2,
+                contentDescription = "ARASOF-AIMS Logo",
+                tint = Color.White,
+                modifier = Modifier.size(72.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                text = "ARASOF-AIMS",
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = "Batangas State University - ARASOF Nasugbu\nAsset Inventory and Mapping System",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White.copy(alpha = 0.9f),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(28.dp))
+            CircularProgressIndicator(
+                color = Color.White,
+                strokeWidth = 3.dp
+            )
+        }
     }
 }
