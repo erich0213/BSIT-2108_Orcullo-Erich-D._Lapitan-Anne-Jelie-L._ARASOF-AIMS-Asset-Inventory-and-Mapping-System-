@@ -6,19 +6,30 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.arasof.aims.ui.theme.ARASOFAIMSTheme
+import ui.screens.AddAssetScreen
 import ui.screens.AppTab
+import ui.screens.AssetsScreen
 import ui.screens.DashboardScreen
 import ui.screens.LoginScreen
+import ui.screens.MapScreen
+import ui.screens.ProfileScreen
+import ui.screens.SampleCampusAsset
 import ui.screens.SplashScreen
+import ui.screens.sampleCampusAssets
 
 enum class ScreenState {
     SPLASH,
     LOGIN,
-    DASHBOARD
+    DASHBOARD,
+    MAP,
+    ASSETS,
+    ADD_ASSET,
+    PROFILE
 }
 
 class MainActivity : ComponentActivity() {
@@ -29,6 +40,13 @@ class MainActivity : ComponentActivity() {
             ARASOFAIMSTheme {
                 var currentScreen by remember { mutableStateOf(ScreenState.SPLASH) }
                 var loggedInUser by remember { mutableStateOf("") }
+
+                // DITO ANG PAGBABAGO: Inilagay ang sample assets sa initial state ng listahan
+                val assetList = remember {
+                    mutableStateListOf<SampleCampusAsset>().apply {
+                        addAll(sampleCampusAssets)
+                    }
+                }
 
                 when (currentScreen) {
                     ScreenState.SPLASH -> {
@@ -51,15 +69,15 @@ class MainActivity : ComponentActivity() {
                     ScreenState.DASHBOARD -> {
                         DashboardScreen(
                             username = loggedInUser,
-                            assetCount = 0,
+                            assetCount = assetList.size,
                             buildingCount = 0,
                             departmentCount = 0,
                             roomCount = 0,
                             onOpenMap = {
-                                Toast.makeText(this, "Map coming soon", Toast.LENGTH_SHORT).show()
+                                currentScreen = ScreenState.MAP
                             },
                             onOpenAssets = {
-                                Toast.makeText(this, "Assets coming soon", Toast.LENGTH_SHORT).show()
+                                currentScreen = ScreenState.ASSETS
                             },
                             onOpenBuildingsRooms = {
                                 Toast.makeText(this, "Buildings & Rooms coming soon", Toast.LENGTH_SHORT).show()
@@ -68,18 +86,85 @@ class MainActivity : ComponentActivity() {
                                 Toast.makeText(this, "Reports coming soon", Toast.LENGTH_SHORT).show()
                             },
                             onOpenProfile = {
+                                currentScreen = ScreenState.PROFILE
+                            },
+                            onSelectTab = { tab ->
+                                when (tab) {
+                                    AppTab.HOME -> currentScreen = ScreenState.DASHBOARD
+                                    AppTab.MAP -> currentScreen = ScreenState.MAP
+                                    AppTab.ASSETS -> currentScreen = ScreenState.ASSETS
+                                    AppTab.MORE -> currentScreen = ScreenState.PROFILE
+                                }
+                            }
+                        )
+                    }
+
+                    ScreenState.MAP -> {
+                        MapScreen(
+                            onBackToDashboard = {
+                                currentScreen = ScreenState.DASHBOARD
+                            },
+                            onSelectTab = { tab ->
+                                when (tab) {
+                                    AppTab.HOME -> currentScreen = ScreenState.DASHBOARD
+                                    AppTab.MAP -> currentScreen = ScreenState.MAP
+                                    AppTab.ASSETS -> currentScreen = ScreenState.ASSETS
+                                    AppTab.MORE -> currentScreen = ScreenState.PROFILE
+                                }
+                            },
+                            onOpenBuildingsRooms = {
+                                Toast.makeText(this, "Buildings & Rooms coming soon", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+
+                    ScreenState.ASSETS -> {
+                        AssetsScreen(
+                            onBackClick = {
+                                currentScreen = ScreenState.DASHBOARD
+                            },
+                            onAddAssetClick = {
+                                currentScreen = ScreenState.ADD_ASSET
+                            },
+                            assets = assetList // DITO ANG PAGBABAGO: Ipinasa ang live list papunta sa screen
+                        )
+                    }
+
+                    ScreenState.ADD_ASSET -> {
+                        AddAssetScreen(
+                            onBackClick = {
+                                currentScreen = ScreenState.ASSETS
+                            },
+                            onSaveAsset = { newAsset ->
+                                val existingIndex = assetList.indexOfFirst { it.propertyNo == newAsset.propertyNo }
+                                if (existingIndex >= 0) {
+                                    assetList[existingIndex] = newAsset
+                                } else {
+                                    assetList.add(0, newAsset) // Idadagdag sa pinakataas ng listahan
+                                }
+                                currentScreen = ScreenState.ASSETS
+                                Toast.makeText(this, "Asset saved", Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+
+                    ScreenState.PROFILE -> {
+                        ProfileScreen(
+                            username = loggedInUser,
+                            logoResId = R.drawable.bsu_logo,
+                            onBackToDashboard = {
+                                currentScreen = ScreenState.DASHBOARD
+                            },
+                            onLogout = {
                                 loggedInUser = ""
                                 currentScreen = ScreenState.LOGIN
                             },
                             onSelectTab = { tab ->
                                 when (tab) {
                                     AppTab.HOME -> currentScreen = ScreenState.DASHBOARD
-                                    AppTab.MAP -> Toast.makeText(this, "Map tab selected", Toast.LENGTH_SHORT).show()
-                                    AppTab.ASSETS -> Toast.makeText(this, "Assets tab selected", Toast.LENGTH_SHORT).show()
-                                    AppTab.MORE -> {
-                                        loggedInUser = ""
-                                        currentScreen = ScreenState.LOGIN
-                                    }
+                                    AppTab.MAP -> currentScreen = ScreenState.MAP
+                                    AppTab.ASSETS -> currentScreen = ScreenState.ASSETS
+                                    AppTab.MORE -> currentScreen = ScreenState.PROFILE
                                 }
                             }
                         )
