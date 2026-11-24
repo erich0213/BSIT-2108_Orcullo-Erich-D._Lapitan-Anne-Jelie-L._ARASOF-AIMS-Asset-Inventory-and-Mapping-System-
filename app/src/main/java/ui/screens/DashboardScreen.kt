@@ -1,5 +1,6 @@
 package ui.screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -87,7 +88,7 @@ fun DashboardScreen(
                         text = "ARASOF AIMS",
                         color = Color.White,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp
+                        fontSize = 20.sp
                     )
                 },
                 navigationIcon = {
@@ -121,36 +122,95 @@ fun DashboardScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
-                .padding(16.dp)
+                .padding(18.dp)
         ) {
             val displayName = username.ifBlank { "User" }
             Text(
                 text = "Hello, $displayName!",
-                fontSize = 22.sp,
+                fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
-                color = MaroonPrimary
+                color = Color(0xFF212529)
             )
             Text(
                 text = "Welcome to ARASOF AIMS",
-                fontSize = 13.sp,
+                fontSize = 14.sp,
                 color = TextMuted
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
+            // Main 2x2 Feature Grid
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 DashboardFeatureCard(
                     title = "Map",
+                    subtitle = "Locate assets on campus map",
                     icon = Icons.Default.Map,
                     onClick = onOpenMap,
                     modifier = Modifier.weight(1f)
                 )
                 DashboardFeatureCard(
                     title = "Assets",
+                    subtitle = "Browse and manage assets",
                     icon = Icons.Default.Inventory2,
+                    onClick = onOpenAssets,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                DashboardFeatureCard(
+                    title = "Buildings &\nRooms",
+                    subtitle = "View campus buildings & rooms",
+                    icon = Icons.Default.Apartment,
+                    onClick = onOpenBuildingsRooms,
+                    modifier = Modifier.weight(1f)
+                )
+                DashboardFeatureCard(
+                    title = "Reports",
+                    subtitle = "Generated system reports",
+                    icon = Icons.Default.BarChart,
+                    onClick = onOpenReports,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            Text(
+                text = "Quick Stats",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF212529)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Quick Stats 2x2 Grid
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                StatSummaryCard(
+                    label = "Buildings",
+                    value = buildingCount.toString(),
+                    icon = Icons.Default.Apartment,
+                    accentColor = Color(0xFF0D6EFD),
+                    onClick = onOpenBuildingsRooms,
+                    modifier = Modifier.weight(1f)
+                )
+                StatSummaryCard(
+                    label = "Assets",
+                    value = assetCount.toString(),
+                    icon = Icons.Default.Devices,
+                    accentColor = Color(0xFF198754),
                     onClick = onOpenAssets,
                     modifier = Modifier.weight(1f)
                 )
@@ -162,61 +222,11 @@ fun DashboardScreen(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                DashboardFeatureCard(
-                    title = "Buildings &\nRooms",
-                    icon = Icons.Default.Apartment,
-                    onClick = onOpenBuildingsRooms,
-                    modifier = Modifier.weight(1f)
-                )
-                DashboardFeatureCard(
-                    title = "Reports",
-                    icon = Icons.Default.BarChart,
-                    onClick = onOpenReports,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(20.dp))
-
-            Text(
-                text = "Quick Stats",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaroonPrimary
-            )
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                StatSummaryCard(
-                    label = "Buildings",
-                    value = buildingCount.toString(),
-                    icon = Icons.Default.Apartment,
-                    onClick = onOpenBuildingsRooms,
-                    modifier = Modifier.weight(1f)
-                )
-                StatSummaryCard(
-                    label = "Assets",
-                    value = assetCount.toString(),
-                    icon = Icons.Default.Devices,
-                    onClick = onOpenAssets,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
                 StatSummaryCard(
                     label = "Departments",
                     value = departmentCount.toString(),
                     icon = Icons.Default.AccountTree,
+                    accentColor = Color(0xFF6F42C1),
                     onClick = onOpenReports,
                     modifier = Modifier.weight(1f)
                 )
@@ -224,6 +234,7 @@ fun DashboardScreen(
                     label = "Rooms",
                     value = roomCount.toString(),
                     icon = Icons.Default.MeetingRoom,
+                    accentColor = Color(0xFFFD7E14),
                     onClick = onOpenBuildingsRooms,
                     modifier = Modifier.weight(1f)
                 )
@@ -235,22 +246,23 @@ fun DashboardScreen(
 @Composable
 private fun DashboardFeatureCard(
     title: String,
+    subtitle: String,
     icon: ImageVector,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
         modifier = modifier
-            .height(112.dp)
+            .height(140.dp)
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(12.dp),
+                .padding(14.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -258,15 +270,25 @@ private fun DashboardFeatureCard(
                 imageVector = icon,
                 contentDescription = title,
                 tint = MaroonPrimary,
-                modifier = Modifier.size(34.dp)
+                modifier = Modifier.size(44.dp)
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = title,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
-                lineHeight = 16.sp
+                lineHeight = 18.sp,
+                color = Color(0xFF212529)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = subtitle,
+                fontSize = 10.sp,
+                color = TextMuted,
+                textAlign = TextAlign.Center,
+                lineHeight = 12.sp,
+                maxLines = 2
             )
         }
     }
@@ -277,40 +299,47 @@ private fun StatSummaryCard(
     label: String,
     value: String,
     icon: ImageVector,
+    accentColor: Color,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+        modifier = modifier
+            .height(80.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(14.dp),
+        colors = CardDefaults.cardColors(containerColor = accentColor.copy(alpha = 0.06f)),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxSize()
                 .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = label,
-                tint = MaroonPrimary,
-                modifier = Modifier.size(24.dp)
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = label,
+                    tint = accentColor,
+                    modifier = Modifier.size(20.dp)
+                )
+                Spacer(modifier = Modifier.width(6.dp))
                 Text(
                     text = label,
-                    fontSize = 11.sp,
-                    color = TextMuted
-                )
-                Text(
-                    text = value,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 12.sp,
+                    color = TextMuted,
+                    fontWeight = FontWeight.Medium
                 )
             }
+            Text(
+                text = value,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF212529)
+            )
         }
     }
 }
