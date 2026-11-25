@@ -1,5 +1,7 @@
 package ui.screens
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,9 +21,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arasof.aims.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -38,66 +43,82 @@ private val SurfaceLight = Color(0xFFF8F9FA)
 private val TextMuted = Color(0xFF6C757D)
 private val TextDark = Color(0xFF212529)
 
-private val ArasofCampusCenter = LatLng(14.0682, 120.6306)
-private const val DefaultCampusZoom = 17.5f
+// BSU ARASOF-Nasugbu — R. Martinez Street, Barangay Bucana, Nasugbu, Batangas
+private val ArasofCampusCenter = LatLng(14.06724, 120.62672)
+private const val DefaultCampusZoom = 18.0f
 
-private data class MapPinItem(
+private data class CampusBuildingPin(
     val id: String,
     val title: String,
     val subtitle: String,
+    val rooms: List<String>,
+    @DrawableRes val photoRes: Int?,
     val pinColor: Color,
     val markerHue: Float,
     val position: LatLng
 )
 
+// Palitan o dagdagan ang coordinates/rooms kung may eksaktong GPS points ka para sa bawat building
 private val campusPins = listOf(
-    MapPinItem(
-        id = "main_bldg",
-        title = "Main Building",
-        subtitle = "Admin & Academic Offices",
+    CampusBuildingPin(
+        id = "heb_san_juan",
+        title = "HEB / San Juan Building",
+        subtitle = "Admin, Academic Offices & Rooms",
+        rooms = listOf("HEB 101", "HEB 102", "Admin Office"),
+        photoRes = R.drawable.bldg_heb_san_juan,
         pinColor = Color(0xFF8E24AA),
         markerHue = BitmapDescriptorFactory.HUE_VIOLET,
-        position = LatLng(14.0682, 120.6306)
+        position = LatLng(14.06724, 120.62672)
     ),
-    MapPinItem(
-        id = "eng_wing",
-        title = "Engineering Wing",
-        subtitle = "Computer & Technical Labs",
+    CampusBuildingPin(
+        id = "cteb_bldg",
+        title = "CTEB Building",
+        subtitle = "Teacher Education Rooms & Labs",
+        rooms = listOf("CTEB 201", "CTEB 202", "Faculty Room"),
+        photoRes = R.drawable.bldg_cteb,
         pinColor = Color(0xFF1E88E5),
         markerHue = BitmapDescriptorFactory.HUE_AZURE,
-        position = LatLng(14.0685, 120.6303)
+        position = LatLng(14.06745, 120.62655)
     ),
-    MapPinItem(
-        id = "acad_hall",
-        title = "Academic Hall",
-        subtitle = "Lecture Rooms & Assets",
+    CampusBuildingPin(
+        id = "ibaan_bldg",
+        title = "Ibaan Building",
+        subtitle = "Lecture Rooms & Classrooms",
+        rooms = listOf("Ibaan 101", "Ibaan 102", "Ibaan 201"),
+        photoRes = R.drawable.bldg_ibaan,
+        pinColor = Color(0xFF2E7D32),
+        markerHue = BitmapDescriptorFactory.HUE_GREEN,
+        position = LatLng(14.06738, 120.62695)
+    ),
+    CampusBuildingPin(
+        id = "infirmary_bldg",
+        title = "Campus Infirmary",
+        subtitle = "Health & Medical Rooms",
+        rooms = listOf("Clinic Room 1", "Consultation Room"),
+        photoRes = R.drawable.bldg_infirmary,
         pinColor = Color(0xFFD32F2F),
         markerHue = BitmapDescriptorFactory.HUE_RED,
-        position = LatLng(14.0687, 120.6309)
+        position = LatLng(14.06705, 120.62650)
     ),
-    MapPinItem(
-        id = "lab_center",
-        title = "Laboratory Zone",
-        subtitle = "Equipment & Workstations",
-        pinColor = Color(0xFFEF6C00),
-        markerHue = BitmapDescriptorFactory.HUE_ORANGE,
-        position = LatLng(14.0680, 120.6310)
-    ),
-    MapPinItem(
-        id = "library_area",
-        title = "Campus Library",
-        subtitle = "Study & Reference Area",
-        pinColor = Color(0xFFD32F2F),
-        markerHue = BitmapDescriptorFactory.HUE_ROSE,
-        position = LatLng(14.0679, 120.6304)
-    ),
-    MapPinItem(
-        id = "south_wing",
-        title = "South Facility",
-        subtitle = "Rooms & Storage Assets",
+    CampusBuildingPin(
+        id = "hostel_bldg",
+        title = "ARASOF Hostel",
+        subtitle = "Accommodation & Function Rooms",
+        rooms = listOf("Room A", "Room B", "Function Hall"),
+        photoRes = R.drawable.bldg_hostel,
         pinColor = Color(0xFF8E24AA),
         markerHue = BitmapDescriptorFactory.HUE_MAGENTA,
-        position = LatLng(14.0676, 120.6307)
+        position = LatLng(14.06695, 120.62685)
+    ),
+    CampusBuildingPin(
+        id = "main_gate_1",
+        title = "Main Gate (R. Martinez St.)",
+        subtitle = "BSU ARASOF-Nasugbu Entrance",
+        rooms = listOf("Guard House", "Visitor Desk"),
+        photoRes = R.drawable.bldg_gate_1,
+        pinColor = Color(0xFFEF6C00),
+        markerHue = BitmapDescriptorFactory.HUE_ORANGE,
+        position = LatLng(14.06712, 120.62628)
     )
 )
 
@@ -106,7 +127,8 @@ private val campusPins = listOf(
 fun MapScreen(
     onBackToDashboard: () -> Unit,
     onSelectTab: (AppTab) -> Unit,
-    onOpenBuildingsRooms: () -> Unit = {}
+    onOpenBuildingsRooms: () -> Unit = {},
+    onOpenBuildingDetail: (String) -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     var searchQuery by remember { mutableStateOf("") }
@@ -117,11 +139,14 @@ fun MapScreen(
         position = CameraPosition.fromLatLngZoom(ArasofCampusCenter, DefaultCampusZoom)
     }
 
-    val matchingPins = campusPins.filter {
-        searchQuery.isBlank() ||
-                it.title.contains(searchQuery, ignoreCase = true) ||
-                it.subtitle.contains(searchQuery, ignoreCase = true)
+    fun matchesQuery(pin: CampusBuildingPin, query: String): Boolean {
+        if (query.isBlank()) return true
+        return pin.title.contains(query, ignoreCase = true) ||
+                pin.subtitle.contains(query, ignoreCase = true) ||
+                pin.rooms.any { it.contains(query, ignoreCase = true) }
     }
+
+    val matchingPins = campusPins.filter { matchesQuery(it, searchQuery) }
 
     fun focusOn(target: LatLng, zoom: Float = currentZoom) {
         currentZoom = zoom
@@ -184,15 +209,12 @@ fun MapScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            // Search input bar below top bar
+            // Search input bar below top bar (supports building, subtitle, or room search)
             OutlinedTextField(
                 value = searchQuery,
                 onValueChange = { query ->
                     searchQuery = query
-                    campusPins.firstOrNull {
-                        it.title.contains(query, ignoreCase = true) ||
-                                it.subtitle.contains(query, ignoreCase = true)
-                    }?.let { matched ->
+                    campusPins.firstOrNull { matchesQuery(it, query) }?.let { matched ->
                         selectedPin = matched
                         focusOn(matched.position)
                     }
@@ -257,13 +279,16 @@ fun MapScreen(
                     }
                 }
 
-                // Floating selected building card
+                // Floating selected building card with actual building photo + name + rooms preview
                 Card(
                     modifier = Modifier
                         .align(Alignment.Center)
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
-                        .clickable { onOpenBuildingsRooms() },
+                        .clickable {
+                            onOpenBuildingDetail(selectedPin.id)
+                            onOpenBuildingsRooms()
+                        },
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                     elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
@@ -276,17 +301,26 @@ fun MapScreen(
                     ) {
                         Box(
                             modifier = Modifier
-                                .size(width = 64.dp, height = 44.dp)
+                                .size(width = 68.dp, height = 48.dp)
                                 .clip(RoundedCornerShape(8.dp))
                                 .background(MaroonPrimary.copy(alpha = 0.12f)),
                             contentAlignment = Alignment.Center
                         ) {
-                            Icon(
-                                imageVector = Icons.Default.Apartment,
-                                contentDescription = null,
-                                tint = MaroonPrimary,
-                                modifier = Modifier.size(24.dp)
-                            )
+                            if (selectedPin.photoRes != null) {
+                                Image(
+                                    painter = painterResource(id = selectedPin.photoRes!!),
+                                    contentDescription = selectedPin.title,
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize()
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Default.Apartment,
+                                    contentDescription = null,
+                                    tint = MaroonPrimary,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.width(12.dp))
@@ -303,17 +337,26 @@ fun MapScreen(
                                 fontSize = 11.sp,
                                 color = TextMuted
                             )
+                            if (selectedPin.rooms.isNotEmpty()) {
+                                Text(
+                                    text = "Rooms: ${selectedPin.rooms.joinToString(", ")}",
+                                    fontSize = 10.sp,
+                                    color = MaroonPrimary,
+                                    fontWeight = FontWeight.Medium,
+                                    maxLines = 1
+                                )
+                            }
                         }
 
                         Icon(
                             imageVector = Icons.Default.ChevronRight,
-                            contentDescription = "Open Details",
+                            contentDescription = "Open Buildings & Rooms",
                             tint = TextMuted
                         )
                     }
                 }
 
-                // Right-side map controls: reset to BatStateU ARASOF + zoom in/out
+                // Right-side map controls: reset to BSU ARASOF-Nasugbu + zoom in/out
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
